@@ -3,6 +3,7 @@ const app = express()
 const server = require("http").createServer(app)
 const path = require("path")
 const sass = require("node-sass-middleware")
+const roomRoutes = require("./routes")
 
 app.set("views", path.join(__dirname,"/views"))
 app.set("view engine","pug")
@@ -13,11 +14,6 @@ app.use(sass({
 
 }))
 app.use(express.static("/public"))
-
-app.get("/",(req,res)=>{
-  
-   
-  res.render(path.join(__dirname,"views/rooms.pug"));
-})
+app.use('/', roomRoutes())
 
 server.listen(3000,"localhost",()=> console.log("server started"))
