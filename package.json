@@ -1,0 +1,31 @@
+{
+  "name": "heroku_tictactoe",
+  "version": "1.0.0",
+  "description": "online tictactoe",
+  "dependencies": {
+    "express": "^4.16.2",
+    "mysql": "^2.15.0",
+    "node-sass": "^4.7.2",
+    "node-sass-middleware": "^0.11.0",
+    "pug": "^2.0.0-rc.4"
+  },
+  "main": "server.js",
+  "scripts": {
+    "test": "console.log(\"testing 1,2\");",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbilyk/HerokuTicTacToe.git"
+  },
+  "keywords": [
+    "tictactoe",
+    "online"
+  ],
+  "author": "Dmitri Bilyk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dbilyk/HerokuTicTacToe/issues"
+  },
+  "homepage": "https://github.com/dbilyk/HerokuTicTacToe#readme"
+}
