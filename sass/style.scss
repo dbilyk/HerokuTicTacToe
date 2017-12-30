@@ -1,3 +1,40 @@
-body{
-  color: blue;
+#app{
+  width:50%;
+}
+
+#users-online{
+  border: 1px solid lightgray;
+  height:20em;
+  overflow: auto;
+  margin-top:0.5em;
+  .user-li{
+    border-bottom: 1px solid lightgray;
+    float:left;
+    width:100%;
+    p{
+      float:left;
+      margin:0;
+      padding:0.5em;
+    }
+  }
+  .user-status{
+    height:1em;
+    width:1em;
+    margin-top: 3.5%;
+    float:left;
+    background-color: green;
+    border-radius:100%;
+    
+  }
+}
+
+#login-form{
+  input{
+    margin:0.5em 0;
+  }
+
+}
+
+#login-btn{
+  margin:1em 1em;
 }

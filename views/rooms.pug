@@ -1,3 +1,17 @@
 doctype html
 include partials/header.pug
-body some random text
+body 
+  div#app.container-fluid
+    h1.text-center a little game
+    div.row
+      div.col
+        ul#users-online
+          div.user-li 
+            div.user-status 
+            p NotImplemented
+      div.col
+        form#login-form
+          input(type="text" placeholder="username")#username.form-control
+          input(type="password" placeholder="password")#password.form-control
+          button(type="button")#login-btn.btn.btn-primary.text-center Log In 
+          button(type="button")#signup-btn.btn.btn-secondary.text-center Sign Up
