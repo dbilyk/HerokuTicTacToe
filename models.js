@@ -22,8 +22,7 @@ module.exports = function () {
 
         }
         else {
-          console.log(result)
-          callback(true)
+          callback(true,userCredentials.username)
 
         }
       }

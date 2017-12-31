@@ -6,7 +6,7 @@ const path = require("path")
 const sass = require("node-sass-middleware")
 const roomRoutes = require("./roomRoutes")(io)
 
-server.listen(3000, "localhost", () => console.log("server started"))
+server.listen(3000, "0.0.0.0", () => console.log("server started"))
 app.set("views", path.join(__dirname, "/views"))
 app.set("view engine", "pug")
 app.use(sass({

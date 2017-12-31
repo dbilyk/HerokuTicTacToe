@@ -1,5 +1,6 @@
 function ClientRoutes(){
-  var socket = io.connect("localhost:3000");
+  const view = new ViewHandlers()
+  var socket = io.connect("192.168.50.236:3000");
   //when we successfully connect to our node socket server
   socket.on("welcome",(data)=>{
     console.log(data)
@@ -18,6 +19,7 @@ function ClientRoutes(){
     console.log(bool);
     if(bool){
       $("h1:first").html("Success!")
+
     }
     else{
       $("h1:first").html("Wrong username or password...")
@@ -32,7 +34,7 @@ function ClientRoutes(){
       password:pass
     })
   }
-
+  //did the user succeed in signing up?
   socket.on("signupResult",(bool)=>{
     if(bool){
       $("h1:first").html("Signup Successful! \nPlease log in with your new credentials.")
@@ -43,6 +45,31 @@ function ClientRoutes(){
 
     }
   })
+
+
+  socket.on("updateLobby",(data)=>{
+    view.updateLobbyPlayers(data.username,data.state)
+    
+  })
+
+
+}
+
+function ViewHandlers(){
+  var activeUsersElem = () => $("#users-online .user-div:first").clone();
+
+  this.updateLobbyPlayers = function(user,state){
+    if(state){
+      
+      let newUser = $(activeUsersElem()).clone()
+      $(newUser).find("p").html(user);
+      $("#users-online").append(newUser);
+    }
+    else{
+      $("#users-online").find("."+ user).hide();
+      
+    }
+  }
 
 
 }
@@ -65,7 +92,6 @@ function LoginHandlers(){
 function Client(){
   var loginForm = new LoginHandlers();
   var clientRoutes = new ClientRoutes();
-
   $("#login-btn").on('click',(e)=>{
     loginForm.onLogin(clientRoutes,loginForm.username(),loginForm.password());  
   })
