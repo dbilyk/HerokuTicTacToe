@@ -3,13 +3,19 @@ include partials/header.pug
 body 
   div#app.container-fluid
     h1.text-center a little game
-    div.row
-      div.col
+    div.row.justify-content-center
+      div#left-col.col
+        div(hidden)#incoming-challenge.text-center
+          p
+          button(type="button")#accept-chal.btn.btn-primary Yes
+          button(type="button")#decline-chal.btn.btn-danger No
+      div#center-col.col.text-center
         div#users-online
           div.user-div
             div.user-status 
             p golden silence...
-      div.col
+        button(disabled)#play-btn.btn.btn-primary Play!
+      div#right-col.col
         form#login-form
           input(type="text" placeholder="username")#username.form-control
           input(type="password" placeholder="password")#password.form-control

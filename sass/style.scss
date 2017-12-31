@@ -7,34 +7,52 @@
   height:20em;
   overflow: auto;
   margin-top:0.5em;
+  
   .user-div{
     border-bottom: 1px solid lightgray;
-    float:left;
+    display:flex;
+    align-items:center;
     width:100%;
+    height:10%;
     p{
       float:left;
       margin:0;
       padding:0.5em;
     }
+
   }
+  .user-div:hover{
+    background-color: rgb(198, 229, 238);
+  }
+  
+
   .user-status{
     height:1em;
     width:1em;
-    margin-top: 3.5%;
-    float:left;
     background-color: green;
     border-radius:100%;
     
   }
 }
 
-#login-form{
-  input{
-    margin:0.5em 0;
-  }
-
+.selected{
+  background-color:rgb(111, 176, 219);
 }
 
 #login-btn{
   margin:1em 1em;
+}
+
+#play-btn{
+  background-color: rgb(85, 206, 85);
+  color: rgb(39, 39, 39);
+  padding:0.5em;
+  width:100%;
+  border-radius:0;
+
+}
+
+#incoming-challenge{
+  background-color: rgb(224, 177, 96);
+
 }
