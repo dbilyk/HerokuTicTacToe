@@ -227,7 +227,8 @@ module.exports = function (io) {
         let newChallenge = new challenge(targetSocket, callingSocket)
         activeChallenges.push(newChallenge)
         socket.to(targetSocket.id).emit("newChallenge", callingUser)
-
+        console.log(activeChallenges.length)
+        
       }
     })
 
@@ -238,7 +239,14 @@ module.exports = function (io) {
     socket.on("challengeResponse", (accepted) => {
 
       let thisChallenge = findChallenge(socket.id)
-      socket.to(thisChallenge.object.requester.id).emit("challengeResponse", accepted)
+      if(thisChallenge != undefined){
+        socket.to(thisChallenge.object.requester.id).emit("challengeResponse", accepted)
+
+      }
+      else{
+        socket.to(socket.id).emit("error")
+      }
+
 
       if (accepted) {
         var newGame = new Game(socket, thisChallenge.object.requester, io)
@@ -250,20 +258,22 @@ module.exports = function (io) {
 
 
       }
+      else{
+        activeChallenges.splice(thisChallenge.index,1)
+      }
 
 
     })
 
     socket.on("cancelChallenge", () => {
       var challenge = findChallenge(socket.id);
-      var requesterUsername = findUsernameFromSocket(challenge.object.requester.id)
-      if (requesterUsername) {
+      var requesterUsername = findUsernameFromSocket(challenge.object.requester)
+      if (requesterUsername != undefined) {
         socket.to(challenge.object.target.id).emit("cancelChallenge", requesterUsername)
-
       }
       io.emit("updateLobby", usernameList())
-
       activeChallenges.splice(challenge.index, 1)
+
     })
 
 

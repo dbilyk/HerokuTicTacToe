@@ -83,7 +83,7 @@ function GameView() {
       var canvas = $("canvas")[i]
       let ctx = canvas.getContext("2d")
       ctx.clearRect(0,0,$("canvas").outerWidth(),$("canvas").outerHeight())
-      $("#left-col").css("opacity","0")
+      //$("#left-col").css("opacity","0")
     }
   }
 
@@ -161,7 +161,7 @@ function GameView() {
       $("#opponent-name").hide('fast').css({maxWidth:"50%",marginLeft:"0.5em"})
       $("#users-online").show("fast")
       $(".user-div").show()
-      $(".incoming-notification").css('opacity','1')
+      $(".incoming-challenge").css('opacity','1')
       $("#play-btn").show("fast")
       $("#gameboard").removeClass(colorClass).css({ opacity: 1, height: 'auto' })
       

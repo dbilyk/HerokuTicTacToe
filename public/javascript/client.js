@@ -96,6 +96,10 @@ function ClientRoutes() {
   socket.on("cancelChallenge", (username) => {
     view.deleteChalNotification(username)
   })
+
+  socket.on("error",()=>{
+    view.updateHeader("oops, something went wrong!")
+  })
 }
 //functions to update the view
 function ViewHandlers(routes) {
@@ -105,6 +109,7 @@ function ViewHandlers(routes) {
   var loginForm = $("#login-form").clone()
   var challengeAlertTemplate = $(".incoming-challenge:first").clone()
   var awaitingResponse = false
+  var enteredGame = false
 
   var challengeNotification = function (username, notification) {
     this.username = username;
@@ -161,7 +166,7 @@ function ViewHandlers(routes) {
 
   }
 
-
+  var activeChallenges = []
 
   this.newChallengeNotification = function (incomingUsername) {
     var notif = $(challengeAlertTemplate).clone()
@@ -169,6 +174,8 @@ function ViewHandlers(routes) {
     $(notif).find("p").html(incomingUsername + " challenged you! Do you accept?")
     $('#opponent-name h3').html(incomingUsername)
     $("#left-col").append(notif)
+    $(notif).show()
+    activeChallenges.push(incomingUsername,$(notif))
   }
 
   this.waitForChalResponse = function () {
@@ -228,7 +235,6 @@ function ViewHandlers(routes) {
     }
     else {
       $(".notification-from-" + targetBtn).remove()
-      var oppUsername = $(".notification-from-" + targetBtn + " p").html()
     }
   }
 
