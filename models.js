@@ -1,15 +1,14 @@
 const mysql = require("mysql");
 
 module.exports = function () {
-  var con = mysql.createConnection({ host: "dmitribilyk.com", user: "dmitribi_TTT", password: "kar139", database: "dmitribi_nodeTicTacToe" });
   this.connect = () => {
-    con.connect((err) => {
-      if (err) return err
-      else return true
-    })
+    var con = mysql.createConnection({ host: "dmitribilyk.com", user: "dmitribi_TTT", password: "kar139", database: "dmitribi_nodeTicTacToe" });
+    return con;  
   }
+  
 
   this.userAuth = (userCredentials, callback) => {
+    let con = this.connect()
     con.query("SELECT " + "* " + "FROM users " + "WHERE " + "username='" + userCredentials.username + "' AND " + "password='" + userCredentials.password + "'", (err, result, fields) => {
       if (err) {
         console.log(err);
@@ -25,17 +24,19 @@ module.exports = function () {
           callback(true,userCredentials.username)
 
         }
+        con.destroy();
       }
     })
   }
 
   this.insertNewUser = (userCredentials, callback) => {
+    let con = this.connect()
     var query = "SELECT " + "* " + "FROM users " + "WHERE " + "username='" + userCredentials.username + "'";
 
     con.query(query, (err, result, fields) => {
       if (result.length > 0) {
         callback(false)
-        
+        con.destroy() 
       }
       else {
         //insert query
@@ -45,6 +46,7 @@ module.exports = function () {
           }
           else {
             callback(true);
+            con.destroy()
           }
         })
 

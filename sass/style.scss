@@ -1,12 +1,40 @@
 #app{
-  width:50%;
+  width:70%;
 }
+
+#my-name{
+  margin-right:0.5em;
+  margin-bottom:1em;
+  background-color:rgb(144, 223, 91);
+  border-radius: 1em; 
+  -moz-box-shadow: inset 0 0 7px rgb(173, 173, 173);
+  -webkit-box-shadow: inset 0 0 7px rgb(173, 173, 173);
+  box-shadow: inset 0 0 7px rgb(177, 177, 177);
+}
+#opponent-name{
+  margin-left:0.5em;
+  margin-bottom:1em;
+  background-color:rgb(243, 109, 99);
+  border-radius: 1em; 
+  -moz-box-shadow: inset 0 0 7px rgb(173, 173, 173);
+  -webkit-box-shadow: inset 0 0 7px rgb(173, 173, 173);
+  box-shadow: inset 0 0 7px rgb(177, 177, 177);
+}
+
+#center-col > div.row:first-child{
+    margin:0;
+    overflow:hidden;
+    border-radius: 1em;
+    margin-bottom:1em;
+
+  }
 
 #users-online{
   border: 1px solid lightgray;
+  border-radius: 3px 3px 0 0;
   height:20em;
   overflow: auto;
-  margin-top:0.5em;
+  
   
   .user-div{
     border-bottom: 1px solid lightgray;
@@ -27,12 +55,17 @@
   
 
   .user-status{
-    height:1em;
-    width:1em;
-    background-color: green;
+    height:0.7em;
+    width:0.7em;
+    margin-left:1em;
+    background-color: rgb(51, 177, 51);
     border-radius:100%;
     
   }
+}
+
+.form-control{
+  margin-bottom:1em;
 }
 
 .selected{
@@ -40,7 +73,7 @@
 }
 
 #login-btn{
-  margin:1em 1em;
+  margin:0 1em;
 }
 
 #play-btn{
@@ -49,10 +82,83 @@
   padding:0.5em;
   width:100%;
   border-radius:0;
+  border-radius: 0 0 3px 3px;
+}
+
+#waiting{
+  margin-top:25%;
+  
+}
+
+#cancel-req-btn{
+  background-color: rgb(209, 99, 85);
+  
+}
+
+
+.incoming-challenge{
+  
+  border: 1px solid lightgray;
+  border-radius:3px;
+  float: right;
+  width: 50%;
+
+  button{
+    width: 50%;
+    border-radius:0;
+  
+  }
+  .accept-chal{
+    background-color: rgb(85, 206, 85);
+    &:hover{
+      background-color: rgb(73, 180, 73);
+    }
+   border-radius:0 0 0 3px; 
+  }
+  .decline-chal{
+    background-color: rgb(241, 241, 241);
+    color: rgb(39, 39, 39);
+   border-radius:0 0 3px 0; 
+   &:hover{
+     background-color: rgb(196, 196, 196)
+   }
+  }
+
+}
+$borderColor: rgb(200,200,200);
+#gameboard{
+  margin:0px;
+  border-radius:3px;
+  overflow:hidden;
+  border:1px solid $borderColor;
+  canvas{
+    height:6.5vw;
+    padding:0;
+    &:nth-child(n){
+      border-right:1px solid $borderColor; 
+      border-bottom: 1px solid $borderColor;
+    
+    }
+    &:nth-child(3n + 3){
+      border-right: 0;
+    }
+    &:nth-child(n+7){
+      border-bottom:0;
+    }
+  }
+  
+}
+.winColor{
+  opacity:1;
+  background-color:rgb(144, 223, 91);
+
+}
+.loseColor{
+  background-color:rgb(209, 99, 85);
+
+}
+.drawColor{
+  background-color:rgb(245, 219, 105);
 
 }
 
-#incoming-challenge{
-  background-color: rgb(224, 177, 96);
-
-}

@@ -5,12 +5,29 @@ body
     h1.text-center a little game
     div.row.justify-content-center
       div#left-col.col
-        div(hidden)#incoming-challenge.text-center
+        div.incoming-challenge.text-center
           p
-          button(type="button")#accept-chal.btn.btn-primary Yes
-          button(type="button")#decline-chal.btn.btn-danger No
+          button(type="button").accept-chal.btn.btn-primary Yes
+          button(type="button").decline-chal.btn.btn-danger No
       div#center-col.col.text-center
+        div.row
+          div#my-name.col.text-center
+            h3 
+          div#opponent-name.col.text-center
+            h3
+        div#gameboard.row
+          canvas#x0.col-4
+          canvas#x1.col-4
+          canvas#x2.col-4
+          canvas#x3.col-4
+          canvas#x4.col-4
+          canvas#x5.col-4
+          canvas#x6.col-4
+          canvas#x7.col-4
+          canvas#x8.col-4
         div#users-online
+          p#waiting.align-self-center
+          button#cancel-req-btn.btn.btn-primary Cancel
           div.user-div
             div.user-status 
             p golden silence...
