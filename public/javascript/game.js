@@ -23,6 +23,7 @@ function GameRoutes(io, lobView) {
 
   }
 
+
   socket.on("gameSetup", (object) => {
     //choose who gets to go first
     myTurn = object.opponentStatus.myTurn
@@ -108,8 +109,8 @@ function GameView() {
     var width = (canvas.width)
     var height = (canvas.height)
     var ctx = canvas.getContext('2d')
-    var pad = 10
-    ctx.lineWidth = 4 * time
+    var pad = 20
+    ctx.lineWidth = 8 * time
     ctx.lineCap = "round"
     ctx.strokeStyle = "#62db5c"
     //drawing first line
@@ -154,10 +155,10 @@ function GameView() {
     var time = (new Date().getTime() - animStart) * 0.002 * speed;
     var ctx = canvas.getContext("2d")
     ctx.strokeStyle = "#db685c"
-    ctx.lineWidth = 4 * time
+    ctx.lineWidth = 8 * time
     ctx.moveTo(canvas.width, canvas.height / 2)
     ctx.beginPath()
-    ctx.arc(canvas.width / 2, canvas.height / 2, ((canvas.width / 2) + (canvas.height / 2)) / 2.4, 0 * Math.PI, 2 * Math.PI * time)
+    ctx.arc(canvas.width / 2, canvas.height / 2, ((canvas.width / 2) + (canvas.height / 2)) / 3, 0 * Math.PI, 2 * Math.PI * time)
     ctx.stroke()
     if (2 * time < 2) {
       currentAnimFrame = requestAnimationFrame(() => this.drawO(canvas, speed))

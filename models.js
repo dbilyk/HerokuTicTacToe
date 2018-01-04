@@ -3,9 +3,9 @@ const mysql = require("mysql");
 module.exports = function () {
   this.connect = () => {
     var con = mysql.createConnection({ host: "dmitribilyk.com", user: "dmitribi_TTT", password: "kar139", database: "dmitribi_nodeTicTacToe" });
-    return con;  
+    return con;
   }
-  
+
 
   this.userAuth = (userCredentials, callback) => {
     let con = this.connect()
@@ -21,48 +21,62 @@ module.exports = function () {
 
         }
         else {
-          callback(true,userCredentials.username)
+          callback(true, userCredentials.username)
 
         }
-        con.destroy();
       }
     })
+    con.end()
   }
 
-  this.insertNewUser = (userCredentials, callback) => {
+  this.insertNewUser = (userCredentials, uniqueNameCB) => {
     let con = this.connect()
     var query = "SELECT " + "* " + "FROM users " + "WHERE " + "username='" + userCredentials.username + "'";
 
     con.query(query, (err, result, fields) => {
       if (result.length > 0) {
-        callback(false)
-        con.destroy() 
+        uniqueNameCB(false)
+        
       }
       else {
         //insert query
-        con.query("INSERT INTO users (username,password) VALUES ('"+userCredentials.username +"','"+userCredentials.password+"')", (err, result, fields) => {
+        con.query("INSERT INTO users (username,password) VALUES ('" + userCredentials.username + "','" + userCredentials.password + "')", (err, result, fields) => {
           if (err) {
             console.log(err)
           }
           else {
-            callback(true);
-            con.destroy()
+            uniqueNameCB(true);
           }
         })
-
+        con.end()
       }
-
-
-
-
     })
-
-    //con.query("INSERT INTO users (username,score) VALUES ('ronburgundy','1000000');");
-    //con.query("DELETE FROM users WHERE username='ronburgundy'");
-
   }
 
+  
 
+  this.getActivePlayersData = function(usersArr,callback,socket){
+    let con = this.connect()
+    let returnData =[]
+    for(var i=0;i<usersArr.length;i++){
+      let query = "SELECT username, wins, losses FROM users WHERE username='"+usersArr[i]+"'"
+      con.query(query,(err, res,fields)=>{
+        if(err){
+          console.log(err) 
+        }
+        else{
+          returnData.push(res[0])
+          console.log(usersArr.length === i)
+          if(i === usersArr.length){
+            callback(returnData,socket)
+          }
+          
+        }
+      })
+      
+    }
+    con.end() 
+  }
 
 
 

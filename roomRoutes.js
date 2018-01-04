@@ -40,6 +40,7 @@ function Game(socketA, socketB, io) {
   this.p1 = { positions: [0, 0, 0, 0, 0, 0, 0, 0, 0], myTurn: true }
   this.p2 = { positions: [0, 0, 0, 0, 0, 0, 0, 0, 0], myTurn: false }
 
+
   function checkForWin(array) {
     winCases =
       [[1, 0, 0, 0, 1, 0, 0, 0, 1],
@@ -119,9 +120,8 @@ function Game(socketA, socketB, io) {
         if (checkForWin(callerData.positions) && totalTurns <= 9) {
 
           io.to(caller.id).emit("youWon", pos)
-          io.to(caller.id).emit("updateLobby", usernameList());
+
           io.to(target.id).emit("youLost", pos)
-          io.to(target.id).emit("updateLobby", usernameList());
         }
         else {
           socket.to(target.id).emit("playTurn", pos)
@@ -131,9 +131,9 @@ function Game(socketA, socketB, io) {
           console.log(totalTurns)
           if (totalTurns == 9) {
             io.to(caller.id).emit("draw")
-            io.to(caller.id).emit("updateLobby", usernameList());
+            db.getActivePlayersData(usernameList(),onActiveUserData,caller);
             io.to(target.id).emit("draw")
-            io.to(target.id).emit("updateLobby", usernameList());
+            db.getActivePlayersData(usernameList(),onActiveUserData,target);
 
           }
         }
@@ -186,19 +186,29 @@ module.exports = function (io) {
 
     //send a welcome event
     socket.emit("welcome", "connected through the roomRoutes File!")
-
+    db.getActivePlayersData(usernameList(), onActiveUserData)
+    
     socket.on("updateLobby", () => {
-      socket.to(socket.id).emit("updateLobby", usernameList())
+      db.getActivePlayersData(usernameList(),onActiveUserData,socket)
     })
-
-    socket.emit("updateLobby", usernameList());
-
+    
+    //testing
+    function onActiveUserData(data,socket) {
+      if(socket){
+        io.to(socket.id).emit("updateLobby", data);
+      }
+      else{
+        io.sockets.emit("updateLobby",data)
+      }
+    }
+    
+    
     //client request login
     socket.on('loginRequest', (credentials) => {
       db.userAuth(credentials, loggedIn);
-
+      
     })
-
+    
     //login result
     function loggedIn(bool, user) {
       //check if user has already logged in elsewhere.
@@ -206,8 +216,8 @@ module.exports = function (io) {
         socket.emit('loginResult', bool, user)
         if (bool) {
           currentUsers.push(new User(user, socket))
-
-          io.sockets.emit("updateLobby", usernameList());
+          //testing
+          db.getActivePlayersData(usernameList(), onActiveUserData)
         }
       }
     }
@@ -273,13 +283,12 @@ module.exports = function (io) {
     socket.on("cancelChallenge", () => {
       var challenge = findChallenge(socket.id);
       if (challenge.index != -1) {
-        console.log(challenge)
         var requesterUsername = findUsernameFromSocket(challenge.object.requester)
         socket.to(challenge.object.target.id).emit("cancelChallenge", requesterUsername)
       } else {
         io.to(socket.id).emit("error")
       }
-      io.emit("updateLobby", usernameList())
+      db.getActivePlayersData(usernameList(),onActiveUserData)
       activeChallenges.splice(challenge.index, 1)
 
     })
@@ -316,7 +325,7 @@ module.exports = function (io) {
       if (playerStillInGame) {
         io.to(playerStillInGame.id).emit('draw')
         delete cancelledGame
-        io.sockets.emit("updateLobby", usernameList())
+        db.getActivePlayersData(usernameList(),onActiveUserData)
       }
 
       var abandonedChallenges = activeChallenges.filter((e) => {
@@ -325,7 +334,6 @@ module.exports = function (io) {
       if (abandonedChallenges) {
         for (var i = 0; i < abandonedChallenges.length; i++) {
           var id = abandonedChallenges[i].target.id;
-          console.log("------------------------------\n-------------------\n")
           io.to(id).emit("cancelChallenge", findUsernameFromSocket(socket))
           var chalIndex = activeChallenges.findIndex((e) => {
             try {
@@ -344,7 +352,7 @@ module.exports = function (io) {
 
       let indexToRemove = currentUsers.findIndex(e => e.socket.id == socket.id)
       if (indexToRemove != -1) currentUsers.splice(indexToRemove, 1);
-      io.sockets.emit("updateLobby", usernameList())
+        db.getActivePlayersData(usernameList(),onActiveUserData)
     })
 
 

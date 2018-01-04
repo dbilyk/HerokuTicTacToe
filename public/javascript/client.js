@@ -58,8 +58,8 @@ function ClientRoutes() {
   }
 
   //recieving lobby update
-  socket.on("updateLobby", (activePlayers) => {
-    view.updateLobbyPlayers(activePlayers)
+  socket.on("updateLobby", (activePlayersData) => {
+    view.updateLobbyPlayers(activePlayersData)
 
   })
   //send challenge
@@ -105,7 +105,8 @@ function ClientRoutes() {
 //functions to update the view
 function ViewHandlers(routes) {
   var clientRoutes = routes
-  var activeUsersElem = $("#users-online .user-div:first").clone();
+  var activeUsersElem = $("#users-online .user-div").clone();
+  $("#users-online .user-div:first").remove()
   var mainHeader = $("h1:first")
   var loginForm = $("#login-form").clone()
   var challengeAlertTemplate = $(".incoming-challenge:first").clone()
@@ -121,7 +122,7 @@ function ViewHandlers(routes) {
     $(".user-div").show()
     $("#left-col").css('opacity', '1')
     $("#play-btn").show("fast")
-    $("#gameboard").removeClass(colorClass).css({ opacity: 1, height: 'auto' })
+    $("#gameboard").removeClass('colorClass').css({ opacity: 1, height: 'auto' })
   }
 
   var challengeNotification = function (username, notification) {
@@ -157,10 +158,13 @@ function ViewHandlers(routes) {
   this.updateLobbyPlayers = function (usersArr) {
     if (!awaitingResponse) {
       $("#users-online .user-div").remove()
-      for (var userStrg in usersArr) {
-        let newUser = $(activeUsersElem).clone()
-        $(newUser).find("p").html(usersArr[userStrg]);
-        $(newUser).addClass("user-list-" + usersArr[userStrg]);
+      for (var i = 0; i< usersArr.length; i++) {
+        let newUser = activeUsersElem.clone()
+        newUser.find(".username").html(usersArr[i].username);
+        newUser.find(".wins").html("wins: " +usersArr[i].wins +" / ")
+        newUser.find(".losses").html(usersArr[i].losses + ":losses")
+        newUser.addClass("user-list-" + usersArr[i].username);
+        console.log(usersArr[0].wins)
         $("#users-online").append(newUser);
 
       }
@@ -322,7 +326,7 @@ function Client() {
   $("#users-online").on("click", ".user-div", (e) => {
     $("#users-online .user-div").removeClass("selected");
     $(e.currentTarget).addClass("selected");
-    var targetUser = $(e.currentTarget).find("p").html();
+    var targetUser = $(e.currentTarget).find(".username").html();
     lobby.targetPlayer = targetUser;
     //you cant play with yourself :)
     if (targetUser != getUsername()) {
@@ -334,6 +338,7 @@ function Client() {
   })
 
   $("#play-btn").on('click', function () {
+
     lobby.challengeTargetPlayer(clientRoutes, getUsername());
 
   })
