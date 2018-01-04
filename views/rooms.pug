@@ -2,19 +2,14 @@ doctype html
 include partials/header.pug
 body 
   div#app.container-fluid
-    h1.text-center a little game
+    h1.text-center Tic Tac Toe
     div.row.justify-content-center
-      div#left-col.col
+      div#left-col.col-sm-12.col-lg-4
         div.incoming-challenge.text-center
           p
           button(type="button").accept-chal.btn.btn-primary Yes
           button(type="button").decline-chal.btn.btn-danger No
-      div#center-col.col.text-center
-        div.row
-          div#my-name.col.text-center
-            h3 
-          div#opponent-name.col.text-center
-            h3
+      div#center-col.col-sm-12.col-lg-4.text-center
         div#gameboard.row
           canvas#x0.col-4
           canvas#x1.col-4
@@ -30,10 +25,16 @@ body
           button#cancel-req-btn.btn.btn-primary Cancel
           div.user-div
             div.user-status 
-            p golden silence...
-        button(disabled)#play-btn.btn.btn-primary Play!
-      div#right-col.col
+            p loading...
+        button(disabled)#play-btn.btn.btn-primary Play
+        div.row
+          div#my-name.col.text-center
+            h3 
+          div#opponent-name.col.text-center
+            h3
+      div#right-col.col-sm-12.col-pull-12.col-lg-4
         form#login-form
+          div#login-error
           input(type="text" placeholder="username")#username.form-control
           input(type="password" placeholder="password")#password.form-control
           button(type="button")#login-btn.btn.btn-primary.text-center Log In 

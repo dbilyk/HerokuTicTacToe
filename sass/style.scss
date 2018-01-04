@@ -1,40 +1,60 @@
+$borderColor: rgb(200,200,200);
+$boxShadowColor : rgb(199, 199, 199);
+
+$h1Size : 1vw;
+
+$h3Size : 0.5vw;
+
+@mixin boxShadow($spread,$color){
+  -moz-box-shadow: inset 0 0 $spread $color;
+  -webkit-box-shadow: inset 0 0 $spread $color;
+  box-shadow: inset 0 0 $spread $color;
+}
+
+
 #app{
-  width:70%;
+  font-family: "Rambla", sans-serif;  
+}
+h1{
+  font-family: "fascinate",sans-serif;
+  font-size: 20pt;
 }
 
 #my-name{
-  margin-right:0.5em;
-  margin-bottom:1em;
-  background-color:rgb(144, 223, 91);
+  min-width:60%;
+  max-width:100%;
+  background-color:rgb(164, 247, 212);
   border-radius: 1em; 
-  -moz-box-shadow: inset 0 0 7px rgb(173, 173, 173);
-  -webkit-box-shadow: inset 0 0 7px rgb(173, 173, 173);
-  box-shadow: inset 0 0 7px rgb(177, 177, 177);
+  font-size: $h1Size;
+  @include boxShadow(7pt, $boxShadowColor)
 }
 #opponent-name{
-  margin-left:0.5em;
-  margin-bottom:1em;
+  float:right;
+  max-width: 40%;
   background-color:rgb(243, 109, 99);
   border-radius: 1em; 
-  -moz-box-shadow: inset 0 0 7px rgb(173, 173, 173);
-  -webkit-box-shadow: inset 0 0 7px rgb(173, 173, 173);
-  box-shadow: inset 0 0 7px rgb(177, 177, 177);
+  @include boxShadow(7pt, $boxShadowColor)
 }
 
-#center-col > div.row:first-child{
+
+
+#center-col > div.row:last-child{
+
+    transition: margin border 0.3s;
     margin:0;
     overflow:hidden;
     border-radius: 1em;
-    margin-bottom:1em;
+    margin-top:1em;
 
   }
 
 #users-online{
   border: 1px solid lightgray;
   border-radius: 3px 3px 0 0;
-  height:20em;
+  height:25vw;
   overflow: auto;
-  
+
+  @include boxShadow(5pt, rgb(204, 204, 204));
   
   .user-div{
     border-bottom: 1px solid lightgray;
@@ -62,11 +82,15 @@
     border-radius:100%;
     
   }
+}#login-form{
+  margin-bottom:2em;
 }
-
 .form-control{
   margin-bottom:1em;
+  width:70%;
+  font-size:pt;
 }
+
 
 .selected{
   background-color:rgb(111, 176, 219);
@@ -76,13 +100,24 @@
   margin:0 1em;
 }
 
+#login-error{
+  margin-top:1em;
+  margin-bottom:0;
+  padding:0 1em;
+  text-align:center;
+  color:rgb(255, 255, 255);
+  border-radius:5pt;
+  background-color:rgb(255, 89, 89)
+
+}
+
 #play-btn{
   background-color: rgb(85, 206, 85);
   color: rgb(39, 39, 39);
   padding:0.5em;
   width:100%;
   border-radius:0;
-  border-radius: 0 0 3px 3px;
+  border-radius: 0 0 3pt 3pt;
 }
 
 #waiting{
@@ -97,9 +132,8 @@
 
 
 .incoming-challenge{
-  
   border: 1px solid lightgray;
-  border-radius:3px;
+  border-radius:2vw;
   float: right;
   width: 50%;
 
@@ -108,31 +142,39 @@
     border-radius:0;
   
   }
+
+  p{
+    margin-bottom: bottom 0;
+    padding: 0.2em;
+  }
+
   .accept-chal{
-    background-color: rgb(85, 206, 85);
+    background-color: rgb(112, 212, 112);
+    border-radius:0 0 0 2vw; 
     &:hover{
-      background-color: rgb(73, 180, 73);
+      background-color: rgb(92, 173, 92);
     }
-   border-radius:0 0 0 3px; 
   }
   .decline-chal{
-    background-color: rgb(241, 241, 241);
+    background-color: rgb(240, 192, 192);
     color: rgb(39, 39, 39);
-   border-radius:0 0 3px 0; 
    &:hover{
-     background-color: rgb(196, 196, 196)
+     background-color: rgb(228, 213, 213)
    }
   }
 
 }
-$borderColor: rgb(200,200,200);
 #gameboard{
+  @include boxShadow(3pt, rgb(204, 204, 204));
   margin:0px;
   border-radius:3px;
   overflow:hidden;
   border:1px solid $borderColor;
+  width: 100%;
+  height: 30vw;
   canvas{
-    height:6.5vw;
+    height:10vw;
+    width:10vw;
     padding:0;
     &:nth-child(n){
       border-right:1px solid $borderColor; 
@@ -154,11 +196,79 @@ $borderColor: rgb(200,200,200);
 
 }
 .loseColor{
-  background-color:rgb(209, 99, 85);
+  background-color:rgb(255, 139, 126);
 
 }
 .drawColor{
-  background-color:rgb(245, 219, 105);
+  background-color:rgb(255, 236, 158);
 
 }
+.turn-border{
+  border: 3px solid rgb(255, 182, 74);
+  margin:0 0.3em;
+  transition: all 0.3s
+}
 
+@media (max-width: 768pt) {
+  #users-online{
+    font-size:5vw
+  }
+
+  .form-control{
+    width:100%;
+    font-size:5vw;
+    padding: 3vw 2vw;
+    &:first-of-type{
+      margin-top:1em;
+    }
+  }
+  .incoming-challenge{
+    width:90%;
+    margin:1em 0 1em 1em;
+
+    float:right;
+    
+    &>p,button{
+      font-size:4vw;
+      color: rgb(46, 46, 46);
+      margin:0;
+    }
+  
+  }
+
+  #login-form>button{
+    margin:0 2.5%;
+    width:45%;
+    font-size:4vw;
+    padding:3vw;
+    
+  }
+  h1{
+    font-size: 10vw;
+  }
+
+  #my-name h3, #opponent-name h3{
+    font-size:8vw;
+    padding:1vw;
+  }
+  
+#play-btn{
+  font-size:6vw;
+}
+
+  #users-online{
+    height:100vw
+  }
+#gameboard{
+  height:98vw;
+  width:100%;
+  canvas{
+    height:33.33vw;
+    width:33.33vw;
+  }
+}
+#login-error{
+  font-size:5vw
+}
+
+}

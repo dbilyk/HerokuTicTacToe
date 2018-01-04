@@ -6,6 +6,8 @@ function GameRoutes(io, lobView) {
   var animSpeed = 1.5
   var roomID
 
+
+
   //user send input
   this.userInput = function (canvas) {
     if (view.getState() == null && !$(canvas).prop("checked") && myTurn) {
@@ -14,9 +16,11 @@ function GameRoutes(io, lobView) {
       socket.emit("playTurn", { roomID: roomID, position: position })
       $(canvas).prop("checked", true)
       view.animate("X", canvas, animSpeed)
-      lobbyView.bounce($("#opponent-name"))
+      $("#opponent-name").addClass("turn-border")
+      $("#my-name").removeClass("turn-border")
       myTurn = false;
     }
+
   }
 
   socket.on("gameSetup", (object) => {
@@ -24,14 +28,23 @@ function GameRoutes(io, lobView) {
     myTurn = object.opponentStatus.myTurn
     roomID = object.roomID
     view.setup()
+    if (myTurn) {
+      $("#my-name").addClass("turn-border")
+    }
+    else{
+
+      $("#opponent-name").addClass("turn-border")
+    }
   })
 
   //recieve a turn
   socket.on("playTurn", (pos) => {
     $($("canvas")[pos]).prop("checked", true)
     view.animate('O', $("canvas")[pos], animSpeed)
-
     myTurn = true;
+
+    $("#my-name").addClass("turn-border")
+    $("#opponent-name").removeClass("turn-border")
   })
   //server confirmed win!
   socket.on("youWon", (winningPos) => {
@@ -79,11 +92,12 @@ function GameView() {
   }
   this.setup = function () {
     $("canvas").prop("checked", false)
-    for(var i =0; i< 9;i++){
+    $("#my-name, #opponent-name").removeClass("turn-border")
+    for (var i = 0; i < 9; i++) {
       var canvas = $("canvas")[i]
       let ctx = canvas.getContext("2d")
-      ctx.clearRect(0,0,$("canvas").outerWidth(),$("canvas").outerHeight())
-      //$("#left-col").css("opacity","0")
+      ctx.clearRect(0, 0, $("canvas").outerWidth(), $("canvas").outerHeight())
+      $("#left-col").css("opacity", "0")
     }
   }
 
@@ -96,6 +110,7 @@ function GameView() {
     var ctx = canvas.getContext('2d')
     var pad = 10
     ctx.lineWidth = 4 * time
+    ctx.lineCap = "round"
     ctx.strokeStyle = "#62db5c"
     //drawing first line
     if (width - pad > (width - pad) * time && !firstLineSaved) {
@@ -116,6 +131,7 @@ function GameView() {
       }
       if (0 + pad < (width - pad) - ((width - pad) * time)) {
         ctx.restore()
+        ctx.lineCap = 'round'
         ctx.beginPath()
         ctx.moveTo(width - pad, pad)
         ctx.lineTo((width - pad) - ((width - pad) * time), (height - pad) * time + pad)
@@ -155,16 +171,20 @@ function GameView() {
 
   function exit(colorClass) {
     $("#gameboard").addClass(colorClass);
-    $("#opponent-name, #opponent-name>h3").animate({maxWidth:0},500)
+    $("#opponent-name").hide()
+    $("my-name").removeClass("turn-border")
+    $("#my-name").animate({ minWidth: "100%" }, 500, () => {
+      $("#my-name").css("minWidth", "")
+    })
     $("#gameboard").animate({ backgroundColor: "white", opacity: 0, height: "0px" }, 2000, () => {
       $("#gameboard").hide()
-      $("#opponent-name").hide('fast').css({maxWidth:"50%",marginLeft:"0.5em"})
+
       $("#users-online").show("fast")
       $(".user-div").show()
-      $(".incoming-challenge").css('opacity','1')
+      $("#left-col").css('opacity', '1')
       $("#play-btn").show("fast")
       $("#gameboard").removeClass(colorClass).css({ opacity: 1, height: 'auto' })
-      
+
     })
   }
   this.exitGame = function (wonBool) {

@@ -3,7 +3,7 @@ function ClientRoutes() {
   this.username = ""
   var waitingInterval;
   this.getSocket = () => socket
-  var socket = io.connect("192.168.50.236:3000");
+  var socket = io();
 
   var newGame = ClientGameEvents(socket, view)
 
@@ -23,13 +23,13 @@ function ClientRoutes() {
   //this is the result of the login request     
   socket.on('loginResult', (bool, user) => {
     if (bool) {
-      view.updateHeader("Success!");
+      view.updateLogin("Success!",true);
       view.hideLogin();
       this.username = user;
       view.updateMyUsername(user)
     }
     else {
-      view.updateHeader("Wrong username or password...")
+      view.updateLogin("Wrong username or password...",false)
     }
 
   })
@@ -44,11 +44,11 @@ function ClientRoutes() {
   //did the user succeed in signing up?
   socket.on("signupResult", (bool) => {
     if (bool) {
-      view.updateHeader("Signup Successful! \nPlease log in with your new credentials.")
+      view.updateLogin("Signup Successful! \nPlease log in with your new credentials.",true)
     }
     else {
 
-      view.updateHeader("Oops! Looks like someone has that username!")
+      view.updateLogin("Oops! Looks like someone has that username!",false)
 
     }
   })
@@ -74,8 +74,8 @@ function ClientRoutes() {
 
   })
   //send challenge response
-  this.challengeResponse = function (answer, targetBtn) {
-    socket.emit("challengeResponse", answer)
+  this.challengeResponse = function (answer, targetBtn, myUsername) {
+    socket.emit("challengeResponse", answer, this.username)
     if (answer) view.enterGame()
 
     view.deleteChalNotification(targetBtn)
@@ -83,8 +83,9 @@ function ClientRoutes() {
   }
 
   //recieve challenge response
-  socket.on("challengeResponse", (answer) => {
+  socket.on("challengeResponse", (answer,otherUser) => {
     (answer) ? view.enterGame() : view.declineChallenge(waitingInterval)
+    view.updateOpponentusername(otherUser)
   })
 
   //send cancel challenge
@@ -97,8 +98,8 @@ function ClientRoutes() {
     view.deleteChalNotification(username)
   })
 
-  socket.on("error",()=>{
-    view.updateHeader("oops, something went wrong!")
+  socket.on("error", () => {
+    view.error()
   })
 }
 //functions to update the view
@@ -110,6 +111,18 @@ function ViewHandlers(routes) {
   var challengeAlertTemplate = $(".incoming-challenge:first").clone()
   var awaitingResponse = false
   var enteredGame = false
+  var activeChallenges = []
+
+  this.error = function () {
+    this.updateHeader("oops, something went wrong!")
+    $("#gameboard").hide()
+    $("#opponent-name").hide('fast').css({ maxWidth: "50%", marginLeft: "0.5em" })
+    $("#users-online").show("fast")
+    $(".user-div").show()
+    $("#left-col").css('opacity', '1')
+    $("#play-btn").show("fast")
+    $("#gameboard").removeClass(colorClass).css({ opacity: 1, height: 'auto' })
+  }
 
   var challengeNotification = function (username, notification) {
     this.username = username;
@@ -119,11 +132,22 @@ function ViewHandlers(routes) {
   this.updateHeader = function (html) {
     $(mainHeader).html(html)
   }
+  this.updateLogin = function(html,ok){
+    if(ok){
+      $("#login-error").html(html);
+      $("#login-error").css({backgroundColor: 'lightgreen'})
+    }
+    else{
+      $("#login-error").html(html);
+      $("#login-error").css({backgroundColor: ''})
+      
+    }
+  }
 
   this.updateMyUsername = function (username) {
     $("#my-name h3").html(username)
     $("#my-name").show()
-    $("#center-col>div.row:first-child").show()
+    $("#center-col>div.row:last-child").show()
   }
 
   this.updateOpponentusername = function (username) {
@@ -148,34 +172,36 @@ function ViewHandlers(routes) {
     $object.prop("height", $object.outerHeight() + "px")
     $object.animate({ height: "+=" + s + "px" }, r, () => {
       $object.animate({ height: "-=" + s + "px" }, r)
+      
     })
     setTimeout(() => {
       $object.animate({ width: "+=" + s + "px" }, r, () => {
-        $object.animate({ width: "-=" + s + "px" }, r)
+        $object.animate({ width: "-=" + s + "px" }, r,()=>{
+        $object.css({width:"",height:''})
+      })
       })
 
     })
   }
   this.hideLogin = function () {
-    $("#login-form").animate({ width: "0%", opacity: 0, paddingRight: "-100px" }, 200, () => {
+    $("#login-form").animate({opacity: 0, paddingRight: "-100px" }, 200, () => {
+
       $("#right-col").empty();
       this.bounce($("#users-online"))
 
     })
-    $("#center-col").css({ maxWidth: "50%" })
 
   }
 
-  var activeChallenges = []
 
   this.newChallengeNotification = function (incomingUsername) {
     var notif = $(challengeAlertTemplate).clone()
     $(notif).addClass("notification-from-" + incomingUsername)
-    $(notif).find("p").html(incomingUsername + " challenged you! Do you accept?")
+    $(notif).find("p").html('<strong>'+incomingUsername + "</strong> challenged you!<br> Do you accept?")
     $('#opponent-name h3').html(incomingUsername)
     $("#left-col").append(notif)
-    $(notif).show()
-    activeChallenges.push(incomingUsername,$(notif))
+    $(notif).show("fast")
+    activeChallenges.push(incomingUsername, $(notif))
   }
 
   this.waitForChalResponse = function () {
@@ -221,7 +247,7 @@ function ViewHandlers(routes) {
     this.updateHeader("challenge declined")
     $(".user-div").show()
     $("#play-btn").show()
-    $("#waiting, #cancel-req-btn").hide()
+    $("#waiting, #cancel-req-btn").hide('fast')
     awaitingResponse = false
     clientRoutes.updateLobby()
 
@@ -336,6 +362,6 @@ $(document).ready(function () {
   $("canvas").prop("height", $("canvas:first-of-type").outerHeight())
   $("canvas").prop("checked", false)
 
-  $(".incoming-challenge, #waiting, #cancel-req-btn,#my-name,#center-col>div.row:first-child,#opponent-name, #gameboard").hide()
+  $(".incoming-challenge, #waiting, #cancel-req-btn,#my-name,#center-col>div.row:last-child,#opponent-name, #gameboard").hide()
   Client();
 })

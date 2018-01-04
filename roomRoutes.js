@@ -34,6 +34,8 @@ function Game(socketA, socketB, io) {
   var totalTurns = 0;
 
   this.roomID;
+  this.getA = () => socketA
+  this.getB = () => socketB
 
   this.p1 = { positions: [0, 0, 0, 0, 0, 0, 0, 0, 0], myTurn: true }
   this.p2 = { positions: [0, 0, 0, 0, 0, 0, 0, 0, 0], myTurn: false }
@@ -71,8 +73,10 @@ function Game(socketA, socketB, io) {
   }
   //join sockets to room
   function roomIDSetCallback() {
-    socketA.join(this.roomID)
-    socketB.join(this.roomID)
+    if (socketA) socketA.join(this.roomID)
+    else IO.to(socketB.id).emit("error")
+    if (socketB) socketB.join(this.roomID)
+    else IO.to(socketA.id).emit("error")
   }
   //called once to push blank state to clients
   this.setUpGame = function () {
@@ -227,8 +231,8 @@ module.exports = function (io) {
         let newChallenge = new challenge(targetSocket, callingSocket)
         activeChallenges.push(newChallenge)
         socket.to(targetSocket.id).emit("newChallenge", callingUser)
-        console.log(activeChallenges.length)
-        
+
+
       }
     })
 
@@ -236,14 +240,15 @@ module.exports = function (io) {
 
 
     //pass answer to relevant socket
-    socket.on("challengeResponse", (accepted) => {
+    socket.on("challengeResponse", (accepted, username) => {
 
       let thisChallenge = findChallenge(socket.id)
-      if(thisChallenge != undefined){
-        socket.to(thisChallenge.object.requester.id).emit("challengeResponse", accepted)
+
+      if (thisChallenge.index != -1) {
+        socket.to(thisChallenge.object.requester.id).emit("challengeResponse", accepted, username)
 
       }
-      else{
+      else {
         socket.to(socket.id).emit("error")
       }
 
@@ -258,8 +263,8 @@ module.exports = function (io) {
 
 
       }
-      else{
-        activeChallenges.splice(thisChallenge.index,1)
+      else {
+        activeChallenges.splice(thisChallenge.index, 1)
       }
 
 
@@ -267,9 +272,12 @@ module.exports = function (io) {
 
     socket.on("cancelChallenge", () => {
       var challenge = findChallenge(socket.id);
-      var requesterUsername = findUsernameFromSocket(challenge.object.requester)
-      if (requesterUsername != undefined) {
+      if (challenge.index != -1) {
+        console.log(challenge)
+        var requesterUsername = findUsernameFromSocket(challenge.object.requester)
         socket.to(challenge.object.target.id).emit("cancelChallenge", requesterUsername)
+      } else {
+        io.to(socket.id).emit("error")
       }
       io.emit("updateLobby", usernameList())
       activeChallenges.splice(challenge.index, 1)
@@ -288,10 +296,53 @@ module.exports = function (io) {
     })
 
 
+
     //disconnect
     socket.on("disconnect", (data) => {
-      let indexToRemove = currentUsers.findIndex(e => e.socket.id == socket.id)
+      let playerStillInGame
+      //find games that player was in and abort them
+      var cancelledGame = activeGames.find((e) => {
+        if (!e.getA().connected) {
+          playerStillInGame = e.getB()
+          return true;
+        }
+        if (!e.getB().connected) {
+          playerStillInGame = e.getA()
+          return true;
+        }
+      })
 
+      //if a player is still in a game with this user...
+      if (playerStillInGame) {
+        io.to(playerStillInGame.id).emit('draw')
+        delete cancelledGame
+        io.sockets.emit("updateLobby", usernameList())
+      }
+
+      var abandonedChallenges = activeChallenges.filter((e) => {
+        return e.requester.id == socket.id
+      })
+      if (abandonedChallenges) {
+        for (var i = 0; i < abandonedChallenges.length; i++) {
+          var id = abandonedChallenges[i].target.id;
+          console.log("------------------------------\n-------------------\n")
+          io.to(id).emit("cancelChallenge", findUsernameFromSocket(socket))
+          var chalIndex = activeChallenges.findIndex((e) => {
+            try {
+              return (e.object.target.id == socket.id || e.object.requester.id == socket.id)
+
+            }
+            catch (e) {
+              return false
+            }
+          })
+          activeChallenges.splice(chalIndex, 1)
+        }
+      }
+
+
+
+      let indexToRemove = currentUsers.findIndex(e => e.socket.id == socket.id)
       if (indexToRemove != -1) currentUsers.splice(indexToRemove, 1);
       io.sockets.emit("updateLobby", usernameList())
     })
