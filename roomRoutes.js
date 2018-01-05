@@ -3,6 +3,16 @@ const database = require("./models")
 const db = new database();
 const hash = require("hashids")
 var HASH = new hash()
+function findSocketFromUsername(username) {
+  var targetUserData = currentUsers.find(e => e.username == username)
+  return (targetUserData) ? targetUserData.socket : false;
+}
+
+function findUsernameFromSocket(socket) {
+  var targetUserData = currentUsers.find(e => e.socket.id == socket.id)
+
+  return (targetUserData) ? targetUserData.username : false;
+}
 function challenge(target, requester) {
   this.target = target;
   this.requester = requester;
@@ -27,7 +37,6 @@ var activeChallenges = []
 var activeGames = []
 
 function Game(socketA, socketB, io) {
-  var IO = io;
   var idSet = false;
   var socketA = socketA
   var socketB = socketB
@@ -37,8 +46,16 @@ function Game(socketA, socketB, io) {
   this.getA = () => socketA
   this.getB = () => socketB
 
-  this.p1 = { positions: [0, 0, 0, 0, 0, 0, 0, 0, 0], myTurn: true }
-  this.p2 = { positions: [0, 0, 0, 0, 0, 0, 0, 0, 0], myTurn: false }
+  this.p1 = {
+    username: findUsernameFromSocket(socketA),
+    positions: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    myTurn: true
+  }
+  this.p2 = {
+    username: findUsernameFromSocket(socketB),
+    positions: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    myTurn: false
+  }
 
 
   function checkForWin(array) {
@@ -75,9 +92,9 @@ function Game(socketA, socketB, io) {
   //join sockets to room
   function roomIDSetCallback() {
     if (socketA) socketA.join(this.roomID)
-    else IO.to(socketB.id).emit("error")
+    else io.to(socketB.id).emit("error")
     if (socketB) socketB.join(this.roomID)
-    else IO.to(socketA.id).emit("error")
+    else io.to(socketA.id).emit("error")
   }
   //called once to push blank state to clients
   this.setUpGame = function () {
@@ -120,20 +137,30 @@ function Game(socketA, socketB, io) {
         if (checkForWin(callerData.positions) && totalTurns <= 9) {
 
           io.to(caller.id).emit("youWon", pos)
-
           io.to(target.id).emit("youLost", pos)
+          //updates the score for both users and updates all sockets
+          //by calling onActiveUserData
+          let winner = (caller.id == socketA.id) ? this.p1.username : this.p2.username
+          let loser = (target.id == socketA.id) ? this.p1.username : this.p2.username
+          var onStatsUpdate = function() {
+            db.getActivePlayersData(usernameList(), onFetchFreshData)
+          }
+          var onFetchFreshData = function(data) {
+            io.sockets.emit("updateLobby", data);
+          }
+          db.updateScore(winner, loser, onStatsUpdate)
+
         }
         else {
           socket.to(target.id).emit("playTurn", pos)
           callerData.myTurn = false;
           targetData.myTurn = true;
           totalTurns++
-          console.log(totalTurns)
           if (totalTurns == 9) {
             io.to(caller.id).emit("draw")
-            db.getActivePlayersData(usernameList(),onActiveUserData,caller);
+            db.getActivePlayersData(usernameList(), onActiveUserData, caller);
             io.to(target.id).emit("draw")
-            db.getActivePlayersData(usernameList(),onActiveUserData,target);
+            db.getActivePlayersData(usernameList(), onActiveUserData, target);
 
           }
         }
@@ -159,16 +186,6 @@ module.exports = function (io) {
 
 
 
-  function findSocketFromUsername(username) {
-    var targetUserData = currentUsers.find(e => e.username == username)
-    return (targetUserData) ? targetUserData.socket : false;
-  }
-
-  function findUsernameFromSocket(socket) {
-    var targetUserData = currentUsers.find(e => e.socket.id == socket.id)
-
-    return (targetUserData) ? targetUserData.username : false;
-  }
 
   function findChallenge(userSocketID) {
     var index = activeChallenges.findIndex((e) => {
@@ -187,28 +204,28 @@ module.exports = function (io) {
     //send a welcome event
     socket.emit("welcome", "connected through the roomRoutes File!")
     db.getActivePlayersData(usernameList(), onActiveUserData)
-    
+
     socket.on("updateLobby", () => {
-      db.getActivePlayersData(usernameList(),onActiveUserData,socket)
+      db.getActivePlayersData(usernameList(), onActiveUserData, socket)
     })
-    
+
     //testing
-    function onActiveUserData(data,socket) {
-      if(socket){
+    function onActiveUserData(data, socket) {
+      if (socket) {
         io.to(socket.id).emit("updateLobby", data);
       }
-      else{
-        io.sockets.emit("updateLobby",data)
+      else {
+        io.sockets.emit("updateLobby", data)
       }
     }
-    
-    
+
+
     //client request login
     socket.on('loginRequest', (credentials) => {
       db.userAuth(credentials, loggedIn);
-      
+
     })
-    
+
     //login result
     function loggedIn(bool, user) {
       //check if user has already logged in elsewhere.
@@ -288,7 +305,7 @@ module.exports = function (io) {
       } else {
         io.to(socket.id).emit("error")
       }
-      db.getActivePlayersData(usernameList(),onActiveUserData)
+      db.getActivePlayersData(usernameList(), onActiveUserData)
       activeChallenges.splice(challenge.index, 1)
 
     })
@@ -325,7 +342,7 @@ module.exports = function (io) {
       if (playerStillInGame) {
         io.to(playerStillInGame.id).emit('draw')
         delete cancelledGame
-        db.getActivePlayersData(usernameList(),onActiveUserData)
+        db.getActivePlayersData(usernameList(), onActiveUserData)
       }
 
       var abandonedChallenges = activeChallenges.filter((e) => {
@@ -352,7 +369,8 @@ module.exports = function (io) {
 
       let indexToRemove = currentUsers.findIndex(e => e.socket.id == socket.id)
       if (indexToRemove != -1) currentUsers.splice(indexToRemove, 1);
-        db.getActivePlayersData(usernameList(),onActiveUserData)
+      db.getActivePlayersData(usernameList(), onActiveUserData)
+      db.connect().end()
     })
 
 

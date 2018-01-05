@@ -60,6 +60,7 @@ function ClientRoutes() {
   //recieving lobby update
   socket.on("updateLobby", (activePlayersData) => {
     view.updateLobbyPlayers(activePlayersData)
+    console.log(activePlayersData)
 
   })
   //send challenge
@@ -164,7 +165,6 @@ function ViewHandlers(routes) {
         newUser.find(".wins").html("wins: " +usersArr[i].wins +" / ")
         newUser.find(".losses").html(usersArr[i].losses + ":losses")
         newUser.addClass("user-list-" + usersArr[i].username);
-        console.log(usersArr[0].wins)
         $("#users-online").append(newUser);
 
       }

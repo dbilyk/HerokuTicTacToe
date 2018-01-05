@@ -79,7 +79,36 @@ module.exports = function () {
   }
 
 
+  this.updateScore = function(winner, loser, callback){
+    var con = this.connect()
+    let toggleWinner = true;
+    let column = ()=>(toggleWinner)?"wins":"losses"
+    let usr = ()=>(toggleWinner)?winner:loser;
+    let queryUser = ()=>"SELECT wins, losses FROM users WHERE username='"+ usr() +"'";
+    let queryInsert = ()=> "UPDATE users SET "+ column() + " = "+ column() + " + 1 " + " WHERE username='"+usr()+"'";
+    
+    for(var i = 0;i<2; i++){
+      con.query(queryUser(),(err, result, fields)=>{
+        if(err) console.log(err)
+        else updateUser(queryInsert(),callback)
 
+        toggleWinner = false;
+      })
+    }
+
+    //called once per user to update their scores with the query and trigger the callback
+    function updateUser(query,cb){
+      console.log("------"+query)
+      con.query(query,(err)=>{
+        if(err) console.log(err)
+        else cb()
+      })
+    }
+    
+    
+  }
+
+  
 
 }
 
